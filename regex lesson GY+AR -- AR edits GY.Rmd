@@ -24,45 +24,7 @@ library(countrycode)
 
 In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>.
 
-
-```{r Introduction, include=FALSE}
-# I dont know if this section will need any code
-
-```
-
-# Subsetting
-
-This section shows some basic subsetting of a data frame.  It uses some regex to do it.  It is not specific to regex but may be a usefull refference for people.
-
-```{r subseting, include=FALSE}
-
-mtnames <- names(mtcars)
-
-# returns indicies
-grep("^d", mtnames)
-
-# returns logic vector
-grepl("^d", mtnames)
-
-# returns subset of original vector
-mtnames[grep("^d", mtnames)] 
-mtnames[grepl("^d", mtnames)] 
-
-# returns subset of columns of dataframe 
-mtcars[,grep("^d", names(mtcars))] 
-
-# returns subset of rows of dataframe 
-mtcars[grep("^D", rownames(mtcars)),] 
-
-# why is this wrong? 
-mtcars[grep("^d", names(mtcars)),] 
-
-# the same thing using data table 
-dtcars <- as.data.table(mtcars)
-dtcars[,.SD,.SDcols = grep("^d",names(dtcars))]
-
-```
-
+# String Manipulations
 
 ```{r String Manipulations, include=FALSE}
 # String Manipulations (GY)
@@ -73,118 +35,148 @@ dtcars[,.SD,.SDcols = grep("^d",names(dtcars))]
 ### A few ideas on string functions to include: detecting patterns, trimming, locating/extracting, splitting, and replacing.
 ### Can include both base and stringr, but no need to focus too much time on these. 
 
+conversion_example <- c("new jersey", "south carolina ", "southern california", "nebraska", "new york", "new mexico", "pennsylvania", "south dakota")
 
-# conversion_example <- c("new jersey", "south carolina ", "southern california", "nebraska", "new york", "new mexico", "pennsylvania", "south dakota")
-conversion_example <- c("new jersey", "south carolina ", "southern california", "nebraska")#, "new york", "new mexico", "pennsylvania", "south dakota")
+# Detecting strings
 
-# base
+### base
 gregexpr("new", conversion_example)	
-# stringr
+
+### stringr
 str_locate_all(conversion_example, "new")
 
-# base
+#### AR: I'm a little confused by these two. I see that they are listed on the table as being equivalent, but they seem to produce slighlty different results. 
+
+## Values
+### base
 grep("south", conversion_example, value = TRUE)	
-# stringr
+
+### stringr
 str_subset(conversion_example, "south")
 
-# base
+## Indices
+### base
 grep("south", conversion_example)	
-# stringr
+
+### stringr
 str_which(conversion_example, "south")
 
-# base
+## Logical vector
+### base
 grepl("south", conversion_example)	
-# stringr
+
+### stringr
 str_detect(conversion_example, "south")
 
+# Replacing strings
+
 # base
-gsub("south", "funfunfun", conversion_example)	
+gsub("south", "funfunfun", conversion_example)
+
 # stringr
 str_replace_all(conversion_example, "south", "funfunfun")
 
+# Finding string length
+
 # base
 nchar(conversion_example)	
+
 # stringr
 str_length(conversion_example)
 
-# base
-order(conversion_example)	
-# stringr
-str_order(conversion_example)
+# Matching strings
 
-# conversion str_match
-# base
+## base
 regexec( "south", conversion_example, perl = TRUE ) 
 yes <- regexec( "south", conversion_example, perl = TRUE ) 
 regmatches(conversion_example, yes)
-# stringr
+
+## stringr
 str_match( conversion_example ,"south")
 
 
-# conversion str_extract
-# base
+# Extracting strings
+
+## base
 yes <- regexpr( "south", conversion_example, perl = TRUE ) 
 regmatches(conversion_example, yes)
-# stringr
+
+## stringr
 str_extract( conversion_example ,"south")
-
-
-# conversion str_locate 
-# base
-regexpr( "south", conversion_example, perl = TRUE ) 
-# stringr
-str_locate(conversion_example , "south")
-
-# base
-sort(conversion_example)	
-# stringr
-str_sort(conversion_example)
-
-# base
-strrep(conversion_example, n)	
-# stringr
-str_dup(conversion_example, n)
-
-# # needs more illistrative example vector
-# # base
-# strsplit(conversion_example, "south")	
-# # stringr
-# str_split(conversion_example, "south")
-
-# # website example is more illistrative 
-# # base
-# strwrap(conversion_example)	
-# # stringr
-# str_wrap(conversion_example)
-
-# base
-sub("south", "funfunfun", conversion_example)	
-# stringr
-str_replace(conversion_example, "south", "funfunfun")
 
 # base
 substr(conversion_example, 2, 4)	
+
 # stringr
 str_sub(conversion_example, 2, 4)
 
-# base
-tolower(conversion_example)	
-# stringr
+
+# Locating strings
+
+## base
+regexpr( "south", conversion_example, perl = TRUE )
+
+## stringr
+str_locate(conversion_example , "south")
+
+# Sorting strings
+
+## base
+sort(conversion_example)
+
+## stringr
+str_sort(conversion_example)
+
+# Duplicating strings
+
+## base
+strrep(conversion_example, n)	
+
+## stringr
+str_dup(conversion_example, n)
+
+# Splitting strings
+
+## base
+strsplit(conversion_example, " ")
+
+## stringr
+str_split(conversion_example, " ")
+
+# Replacing strings
+
+## base
+sub("south", "funfunfun", conversion_example)
+
+## stringr
+str_replace(conversion_example, "south", "funfunfun")
+
+# Removing strings (GY please add)
+
+# Formatting strings
+
+## base
+tolower(conversion_example)
+
+## stringr
 str_to_lower(conversion_example)
 
-# base
-tools::toTitleCase(conversion_example)	
-# stringr
+## base
+tools::toTitleCase(conversion_example)
+
+## stringr
 str_to_title(conversion_example)
 
-# base
+## base
 toupper(conversion_example)	
-# stringr
+
+## stringr
 str_to_upper(conversion_example)
 
-# base
-trimws(conversion_example)	
-# stringr
+## base
+trimws(conversion_example)
+
+## stringr
 str_trim(conversion_example)
 
 
@@ -322,73 +314,45 @@ str_extract(alternates_example, "[a-z]+")
 
 # Examples (GY)
 
-Probably will need to shorten this section a bit. 
+Walking through a few examples with string manipulations and regular expressions.
 
 ```{r examples, echo = T}
 
 # id numbers 
 id <- c("ID3445","WRT-3445","W3D-3445", "YH893","WR-902","WY9323","AO-394","A2-394","W2-657","ER-323","WP-434","YP-434")
 
-# returns every element starting with a Y
-id[grep("^Y", id)] 
 # returns every element starting with W followed by 1 letter and then a dash
 id[grep("^W[[:alpha:]]-", id)] 
+
 # returns every element starting with W followed by 1 or more letters and then a dash
 id[grep("^W[[:alpha:]]+-", id)] 
-# returns every element starting with W followed by any 1 character and then a dash
-id[grep("^W.-", id)]
+
 # returns every element starting with W followed by 1 or more of any character and then a dash
 id[grep("^W.+-", id)]
-# ```
 
 
 # get the whole numbers
 wn <- c("173.34","Deductible $1200", "21", "Copay")
 
-# extracts the whole number portion of element
-str_extract( wn ,"\\d+") 
-# extracts first two digits of element
-str_extract( wn ,"\\d{2}") 
-# extracts last digit of element
-str_extract( wn ,"\\d{1}$") 
-# escape dollar sign
+# escape dollar sign and extract values
 str_extract( wn ,"\\$\\d+") 
+
 # escape dollar sign optional
 str_extract( wn ,"\\$?\\d+") 
+
 # extracts first word of element
 str_extract( wn ,"[[:alpha:]]+") 
 
 
 
 # correct state names
-s <- c("District of\nColumbia", "South Carolina ","Texas", "Hawaii 50")
+s <- c("District of\n Columbia", "South Carolina ","Texas", "Hawaii 50")
 
 # replaces "\n"
-str_replace_all(s, "\n", " ")  
-# replaces all alphabetic characters
-str_replace_all(s, "[[:alpha:]]", " ") 
-# replaces all non alphabetic characters
-str_replace_all(s, "[^[:alpha:]]", " ") 
+str_replace_all(s, "\n", " ") 
 
-str_extract( s ,"[[:alpha:]]+") 
-
-
-
-# get rid of the missing zip
-zips <- c("98300","02390","No Zip")
-
-ifelse( grepl("\\d{5}", zips), zips , "" )
-
-
-# find the dr
-x <- c("Dr Dre","Drought", "ADr", "soft drink", "soft ball", "drink draft beer", "Dr Dre drinks draft beer", "MC Hammer likes Pepsi", "Conor McGregor drinks Whiskey")
-
-grep("Dr", x)
-x[grep("Dr", x)]
-grep("dr", x)
-x[grep("dr", x)]
-x[grep("(?i)dr", x)]
-
+# removes all non alpha or space characters
+str_remove_all(s, "[^[:alpha:][:blank:]]") 
 
 # convert this to numbers
 n <- c("1.2%","1.0%","3.9%","1.9%","5.6%","3.4%")
@@ -402,10 +366,9 @@ x <- c( "var_1","var__2","var____3" ,"anoter_var__3")
 
 # using str_replace_all
 str_replace_all( x ,"[[:punct:]]+", "_")
-# using gsub
-gsub("[[:punct:]]+", "_", x)
-# replace underscore with dot (the dot can be very convient for later on)
-gsub("[[:punct:]]+", ".", x)
+
+# replace underscore with dot 
+gsub("[[:punct:]]+", "\\.", x)
 
 
 # extract value with look arounds
@@ -423,11 +386,6 @@ str_extract( prem ,"(?=.{1,30}Premium)\\d+")
 wp <- c("Hospital.Names...3","State_ ", "George")
 
 str_replace_all(wp, "[._ \\d]", " ")
-str_replace_all(wp, "[._ \\d]+", " ")
-str_replace_all(wp, "[[[:punct:]]]+", " ")
-str_replace_all(wp, "[[[:punct:]]\\d]+", " ")
-str_replace_all(wp, "[[[:punct:]]\\d\\s]+", " ")
-
 
 ### Convert this to a five digit zip code
 zip <- c("91367-6798","91364-2792","4605-2792")
@@ -445,76 +403,23 @@ str_trim(str_extract( fl ,"[[:Alpha:]]+\\s|[[:Alpha:]]+$"), side ="both")
 # first and last names
 str_replace_all(str_trim(str_replace_all(fl, "[[:alpha:]]{1,3}\\.", ""), side ="both"), "[[:punct:]]", "")
 
-
-# more lookarounds 
-y <- c("Ruffles is the most handsome dog", "Max is the happiest Dog", "Kellie likes cats","Bob has dogs and cats")# more complicated 
-
-# First word of string with the word dog
-str_extract( y ,"^[[:Alpha:]]+(?=.{1,30}(?i)dog)") 
-# Second word of string with the word dog
-str_extract( y ," [[:Alpha:]]+(?=.{1,30}(?i)dog)") 
-# First word of string with the word cat
-str_extract( y ,"^[[:Alpha:]]+(?=.{1,30}(?i)cat)") 
-
-
 # grouping - when you place parenthesis around something it keeps it as a seperate group 
 # phone numbers 
 pn <- c("202-555-4343","202-555-8434","555-8434","(434)555-4567","434-555-4567","434-555-4347","(202)555-4567","434-555-4347","(202)555-4567")
 
 # recode phone numbers so they are in same format
-pn <- str_replace_all(str_replace_all(pn, "\\(" , ""), "\\)", "-")  
-
-# remove phone numbers missing area code # be carefull 
-pn <- ifelse(grepl("\\d{3}-\\d{3}-\\d{4}", pn), pn , NA) 
-
-# redact last 7
-str_replace_all(pn, "(\\d{3})-(\\d{3})-(\\d{4})", "\\1-xxx-xxxx")  
-# redact last 4 
-str_replace_all(pn, "(\\d{3})-(\\d{3})-(\\d{4})", "\\1-\\2-xxxx") 
-# redact middle 3
-str_replace_all(pn, "(\\d{3})-(\\d{3})-(\\d{4})", "\\1-xxx-\\3")  
-
-# extract area code of washington numbers
-str_replace_all(str_extract(pn, "^202|^.202"), "\\(" , "") 
-# extract all area codes
-str_replace_all(pn, "(\\d{3})-(\\d{3})-(\\d{4})", "\\1")   
-
-
+str_replace_all(str_replace_all(pn, "\\(" , ""), "\\)", "-")  
 
 
 # counting patters 
 t <- c( "Yankees","Red Sox", "South Central Yard Dawgs", "2019 National League Pennant winning Washington Nationals")
-t
-# count specific letter pattern 
-str_count(t, pattern = "al")
+
+
 # count word boundaries ( 2 x number of words)
 str_count(t, pattern = "\\b") 
+
 # count all groups of alphabetic characters bounded by non alphabetic characters (words)
 str_count(t, pattern = "[[:alpha:]]+") 
-# count all groups of alphanumeric characters bounded by non alphanumeric characters 
-str_count(t, pattern = "[[:alnum:]]+") 
-# display just first word
-str_replace_all(t, "([[:alnum:]]+) ([[:alnum:]]+).+", "\\1")
-# display just second word
-str_replace_all(t, "([[:alnum:]]+) ([[:alnum:]]+).+", "\\2")  #easy but not 100% 
-# try buliding it up in peaces
-# first
-str_extract(t, "(^[[:alnum:]]+\\b)" ) 
-# second
-str_extract(t, "((?<=\\s)[[:alnum:]]+\\b)" ) 
-# combine the two
-str_replace_all(t, "(^[[:alnum:]]+\\b) ((?<=\\s)[[:alnum:]]+\\b)", "\\2") # still not it
-
-
-
-
-
-# split phone numbers into new variables 
-df <- data.frame(pn = c("202-555-4343","202-555-8434","555-8734","(434)555-4567","434-555-4567","434-555-4347","(583)555-4567","434-555-4347"))
-
-df %>% 
-	mutate(pn = str_replace_all(pn, "\\(", "")) %>% 
-	separate(pn, c("A","B","C"), sep = "([\\)-])", fill = "left")
 
 ```
 
@@ -679,6 +584,5 @@ covax_deliveries <- covax_deliveries %>%
 covax_deliveries %>%
   group_by(country) %>%
   summarize(sum(amount[which(type == "Received")])/sum(amount[which(type == "Allocation")])*100) %>% View() 
-
 
 ```
