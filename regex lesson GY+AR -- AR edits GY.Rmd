@@ -45,8 +45,6 @@ gregexpr("new", conversion_example)
 ### stringr
 str_locate_all(conversion_example, "new")
 
-#### AR: I'm a little confused by these two. I see that they are listed on the table as being equivalent, but they seem to produce slighlty different results. 
-
 ## Values
 ### base
 grep("south", conversion_example, value = TRUE)	
@@ -178,6 +176,14 @@ trimws(conversion_example)
 
 ## stringr
 str_trim(conversion_example)
+
+# Sorting strings
+
+## base
+sort(conversion_example)
+
+## stringr
+str_sort(conversion_example)
 
 
 ```
@@ -352,7 +358,7 @@ s <- c("District of\n Columbia", "South Carolina ","Texas", "Hawaii 50")
 str_replace_all(s, "\n", " ") 
 
 # removes all non alpha or space characters
-str_remove_all(s, "[^[:alpha:][:blank:]]") 
+trimws(str_remove_all(s, "[^[:alpha:][:blank:]]")) 
 
 # convert this to numbers
 n <- c("1.2%","1.0%","3.9%","1.9%","5.6%","3.4%")
@@ -429,50 +435,7 @@ Going to be pulling data from each country's COVAX delivery web page. For refere
 
 ```{r real life example set up, include = F}
 
-covax_deliveries_url <- 'https://www.gavi.org/covax-vaccine-roll-out'
-
-covax_deliveries <- covax_deliveries_url %>%
-  read_html() %>%
-  html_nodes("a") %>%
-  html_attr('href') %>%
-  as_tibble() %>%
-  filter(str_detect(value, "covax-vaccine-roll-out/")) %>% 
-  unique() %>% 
-  mutate(link = paste0("https://www.gavi.org", value)) %>%
-  select(-value) %>%
-  mutate(country = str_extract(link, "(?<=out/).*(?=$)")) %>%
-  mutate(country = countrycode::countrycode(country, origin = 'country.name', destination = 'country.name.en', nomatch = country))
-
-doses <- data.frame()
-
-for (x in covax_deliveries$link) {
-  text <- x %>%
-    read_html() %>%
-    html_nodes(".content") %>%
-    html_text()%>%
-    as_tibble() 
-  
-  text <- text$value[2]
-
-  new_doses <- data.frame(
-    "text" = text,
-    "link" = x)
-  
-  doses <- rbind(doses, new_doses)
-}
-
-doses <- doses %>%
-  group_by(link) %>%
-  filter(str_detect(text, 'First')) %>%
-  ungroup()
-
-doses <- doses %>%
-  mutate(text = str_replace_all(text, "\\\n|\\\t", " ")) ## Replace new lines
-
-doses <- doses %>%
-  mutate(text = str_remove_all(text, "Statement.*(?=$)"))
-
-rm(covax_deliveries, covax_deliveries_url, new_doses, text, x)
+doses <- read.csv("L:/r_lessons/regex/Raw Data for Real World Example.csv")
 
 ```
 
