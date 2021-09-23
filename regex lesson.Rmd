@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 # Libraries and Functions
@@ -22,20 +22,16 @@ library(countrycode)
 
 # Introduction (GY + AR)
 
-In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>.
+In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>. 
 
-# String Manipulations
+# String Manipulations (GY)
+
+Below are examples using string manipulations, with both base and stringr functions. These manipulations include detecting strings, finding string length, matching strings, extracting strings, sorting strings, duplicating strings, splitting strings, replacing strings, removing strings, and formatting strings. 
 
 ```{r String Manipulations, include=FALSE}
 # String Manipulations (GY)
 
 #For a conversion of functions between base and stringr, see here: <https://stringr.tidyverse.org/articles/from-base.html>.
-
-## Code below
-### A few ideas on string functions to include: detecting patterns, trimming, locating/extracting, splitting, and replacing.
-### Can include both base and stringr, but no need to focus too much time on these. 
-
-#conversion_example <- c("new jersey", "south carolina ", "southern california", "nebraska", "new york", "new mexico", "pennsylvania", "south dakota")
 
 conversion_example <- c("new jersey", "south central south carolina ", "southern california", "nebraska", "new amsterdam ave, new york city, new york state", "new mexico", "pennsylvania", "south dakota")
 
@@ -50,7 +46,6 @@ lapply(gregexpr("new", conversion_example), function(i) {
 	colnames(out) <- c("start", "end"); out[out < 0] <- NA
 	return(out)
 	})	
-
 
 ### stringr
 str_locate_all(conversion_example, "new")
@@ -76,14 +71,6 @@ grepl("south", conversion_example)
 ### stringr
 str_detect(conversion_example, "south")
 
-# Replacing strings
-
-# base
-gsub("south", "funfunfun", conversion_example)
-
-# stringr
-str_replace_all(conversion_example, "south", "funfunfun")
-
 # Finding string length
 
 # base
@@ -102,37 +89,21 @@ regmatches(conversion_example, yes)
 ## stringr
 str_match( conversion_example ,"south")
 
-
 # Extracting strings
-
-## base
+## Extract specific value
+### base
 yes <- regexpr( "south", conversion_example) 
 regmatches(conversion_example, yes)
 
-## stringr
+### stringr
 str_extract( conversion_example ,"south")
 
-# base
+## Extract by position
+### base
 substr(conversion_example, 2, 4)	
 
-# stringr
+### stringr
 str_sub(conversion_example, 2, 4)
-
-
-# Locating strings
-
-## base
-regexpr( "south", conversion_example, perl = TRUE )
-
-## base replicating stringer
-start <- regexpr("new", conversion_example)
-end <- attributes(start)$match.length
-out <- t(rbind(start,end))
-out[out < 0] <- NA
-out 
-
-## stringr
-str_locate(conversion_example , "south")
 
 # Sorting strings
 
@@ -202,26 +173,17 @@ trimws(conversion_example)
 ## stringr
 str_trim(conversion_example)
 
-# Sorting strings
-
-## base
-sort(conversion_example)
-
-## stringr
-str_sort(conversion_example)
-
 
 ```
 
 
 # Regular Expressions (AR)
 
-Regular expressions are a sequence of special characters to describe a text pattern. Regular expressions are not unique to R and are used across programming languages. We'll go over types of regular expressions before getting into more complicated examples. 
+Regular expressions are a sequence of special characters to describe a text pattern. Regular expressions are not unique to R and are used across programming languages. We'll go over types of regular expressions before getting into more complicated examples. Regular expression topics to be covered include anchors, quantifiers, match characters, escaping, look-arounds, grouping, case insensitivity, 
 
 ```{r regex, echo = T}
 
 ## Code below
-### Ideas we talked about for topics to include: anchors, quantifiers, character classes, escaping, look-around, anti-matches, case insensitive, grouping  
 
 # Anchors
 ## Anchors allow you to find patterns at the start or end of a string
@@ -269,7 +231,6 @@ str_extract_all(match_character_example, "[[:space:]]+")
 str_extract(match_character_example, ".+")
 
 ### Other types -- lowercase, uppercase, blanks (tabs and spaces) and combinations (i.e. [[:alnum:]])
-
 
 # Escaping
 ## Some characters, such as the $ anchor, are used to denote other patterns and do not represent the symbol itself. These characters, in order to be captured, must be escaped. We escape using the \
@@ -322,7 +283,7 @@ str_extract(case_insenstive_example, "(?i)medicare")
 # Alternates
 ## Set parameters around your search
 
-alternates_example <- c("890-450-3583", "annar@kff.org", "1330 G St.", "Corgis are the best dogs")
+alternates_example <- c("202-347-5270", "annar@kff.org", "1330 G St.", "Corgis are the best dogs")
 
 ### Or logical operator
 
@@ -331,6 +292,7 @@ str_extract(alternates_example, "\\d+|[:punct:]+") ## Find first set of digits o
 ### One of
 
 str_extract(alternates_example, "[[:digit:][:punct:][:space:]]+") ## Lets you combine specific character types
+str_extract_all(alternates_example, "[[:digit:][:punct:][:space:]]+")
 
 ### Anything but
 
@@ -374,8 +336,6 @@ str_extract( wn ,"\\$?\\d+")
 # extracts first word of element
 str_extract( wn ,"[[:alpha:]]+") 
 
-
-
 # correct state names
 s <- c("District of\n Columbia", "South Carolina ","Texas", "Hawaii 50")
 
@@ -395,12 +355,8 @@ as.numeric(str_replace_all(n, "%", ""))/100
 # convert multiple underscores into one underscore
 x <- c( "var_1","var__2","var____3" ,"anoter_var__3")
 
-# using str_replace_all
-str_replace_all( x ,"[[:punct:]]+", "_")
-
 # replace underscore with dot 
 gsub("[[:punct:]]+", "\\.", x)
-
 
 # extract value with look arounds
 prem <- c("HMO Premium 456","HMO Premiums 789","Premiums are 345","999 Premiums this year are 443","555 Premiums this year were payed", "Deductible of 721 this year")
@@ -411,7 +367,6 @@ str_extract( prem ,"(?<=Premium.{1,30}\\d{0})\\d+")
 str_extract( prem ,"(?<=Deductible.{1,30}\\d{0})\\d+")
 #use look ahead for number of premium
 str_extract( prem ,"(?=.{1,30}Premium)\\d+")
-
 
 ### get rid of punctuation and numbers
 wp <- c("Hospital.Names...3","State_ ", "George")
@@ -441,16 +396,6 @@ pn <- c("202-555-4343","202-555-8434","555-8434","(434)555-4567","434-555-4567",
 # recode phone numbers so they are in same format
 str_replace_all(str_replace_all(pn, "\\(" , ""), "\\)", "-")  
 
-
-# counting patters 
-t <- c( "Yankees","Red Sox", "South Central Yard Dawgs", "2019 National League Pennant winning Washington Nationals")
-
-
-# count word boundaries ( 2 x number of words)
-str_count(t, pattern = "\\b") 
-
-# count all groups of alphabetic characters bounded by non alphabetic characters (words)
-str_count(t, pattern = "[[:alpha:]]+") 
 
 ```
 
