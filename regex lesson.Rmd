@@ -283,8 +283,6 @@ str_extract(case_insenstive_example, "(?i)medicare")
 # Alternates
 ## Set parameters around your search
 
-alternates_example <- c("202-347-5270", "annar@kff.org", "1330 G St.", "Corgis are the best dogs")
-
 ### Or logical operator
 
 str_extract(alternates_example, "\\d+|[:punct:]+") ## Find first set of digits or punctuation
