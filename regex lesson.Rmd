@@ -26,12 +26,10 @@ In this lesson, we will go over some basic string manipulations (using the packa
 
 # String Manipulations (GY)
 
-Below are examples using string manipulations, with both base and stringr functions. These manipulations include detecting strings, finding string length, matching strings, extracting strings, sorting strings, duplicating strings, splitting strings, replacing strings, removing strings, and formatting strings. 
+Below are examples using string manipulations, with both base and stringr functions. These manipulations include detecting strings, finding string length, matching strings, extracting strings, sorting strings, duplicating strings, splitting strings, replacing strings, removing strings, and formatting strings. Below are examples of these manipulations (with examples in both base and stringr). For a reference on conversions between base and stringr, see here: <https://stringr.tidyverse.org/articles/from-base.html> 
 
 ```{r String Manipulations, include=FALSE}
 # String Manipulations (GY)
-
-#For a conversion of functions between base and stringr, see here: <https://stringr.tidyverse.org/articles/from-base.html>.
 
 conversion_example <- c("new jersey", "south central south carolina ", "southern california", "nebraska", "new amsterdam ave, new york city, new york state", "new mexico", "pennsylvania", "south dakota")
 
@@ -40,7 +38,7 @@ conversion_example <- c("new jersey", "south central south carolina ", "southern
 ### base
 gregexpr("new", conversion_example)	
 
-### base replicating stringer
+### base replicating stringr 
 lapply(gregexpr("new", conversion_example), function(i) {
 	out <- cbind(i, apply(cbind(i-1, attributes(i)$match.length), 1, sum))
 	colnames(out) <- c("start", "end"); out[out < 0] <- NA
@@ -73,10 +71,10 @@ str_detect(conversion_example, "south")
 
 # Finding string length
 
-# base
+## base
 nchar(conversion_example)	
 
-# stringr
+## stringr
 str_length(conversion_example)
 
 # Matching strings
@@ -137,7 +135,7 @@ sub("south", "funfunfun", conversion_example)
 ## stringr
 str_replace(conversion_example, "south", "funfunfun")
 
-# Removing strings (GY please add)
+# Removing strings 
 
 ## base
 sub("new", "", conversion_example)
@@ -267,11 +265,11 @@ str_extract(look_ahead_example, ".*\\.(?= )")
 # Groups
 ## Grouping allows us to set order of evaluation when looking for patterns and add a bit of flexibility.
 
-grouping_example <- c("Violet", "Vince", "Charlie", "Terry", "Vance", "Tanya", "Vicky Vaughn")
+grouping_example <- c("Violet", "Vince", "Charlie", "Terry", "Vance", "Tanya", "Vicky Vaughn", "Vicky Blake")
 
 str_extract(grouping_example, "^(V|T).*") ## Find names that start with V or T
 
-str_extract(grouping_example, "^(V).*\\1.*") ## Allows us to reference previously created groups, which are defined by the parentheses,
+str_extract(grouping_example, "^(V).*\\1.*") ## Allows us to reference previously created groups. The \\1 is referencing the  previous regex
 
 # Case Insensitivity
 ## Ignore case
