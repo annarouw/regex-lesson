@@ -22,7 +22,7 @@ library(countrycode)
 
 # Introduction (GY + AR)
 
-In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>. 
+In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>. Fill in later.
 
 # String Manipulations (GY)
 
