@@ -22,7 +22,7 @@ library(countrycode)
 
 # Introduction (GY + AR)
 
-In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>. Fill in later.
+In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>. 
 
 # String Manipulations (GY)
 
@@ -235,11 +235,11 @@ str_extract(match_character_example, ".+")
 
 escape_example <- c("$4500", "(Hello)", "What is your favorite movie?")
 
-str_extract(escape_example, "$")
+str_extract(escape_example, "$") ## This will give us empty values since we have not escaped
 str_extract(escape_example, "\\$")
-str_extract(escape_example, "?")
+str_extract(escape_example, "?") ## Should return an error since we have not escaped
 str_extract(escape_example, "\\?")
-str_extract(escape_example, "(")
+str_extract(escape_example, "(") ## Should return an error since we have not escaped
 str_extract(escape_example, "\\(")
 
 ## \ can also be used to describe a character type, such as digits or words.
@@ -279,25 +279,29 @@ case_insenstive_example <- c("Medicare", "medicare")
 str_extract(case_insenstive_example, "(?i)medicare")
 
 # Alternates
+
+alternates_example <- c("abc", "abc123", "abc123,.", "123,.", ",.", "123", "abc,. ", "abc 123 .,")
+
 ## Set parameters around your search
 
 ### Or logical operator
 
-str_extract(alternates_example, "\\d+|[:punct:]+") ## Find first set of digits or punctuation
+str_extract(alternates_example, "\\d+|[:punct:]+") ## Find first set of digits or punctuation (if both present, will return the first match)
 
 ### One of
 
 str_extract(alternates_example, "[[:digit:][:punct:][:space:]]+") ## Lets you combine specific character types
-str_extract_all(alternates_example, "[[:digit:][:punct:][:space:]]+")
 
 ### Anything but
 
-str_extract(alternates_example, "[^[:alpha:]]+")
+str_extract(alternates_example, "[^[:alpha:]]+") ## Extract everything but alphabetic characters
 
 ### Range
 
-str_extract(alternates_example, "[a-z]+")
-
+str_extract(alternates_example, "[a-c]+")
+str_extract(alternates_example, "[1-3]+")
+str_extract(alternates_example, "[d-m]+")
+str_extract(alternates_example, "[4-6]+")
 
 ```
 
@@ -395,7 +399,7 @@ str_replace_all(str_replace_all(pn, "\\(" , ""), "\\)", "-")
 
 ```
 
-## Real world example (AR)
+## Real world example -- data cleaning (AR)
 
 Going to be pulling data from each country's COVAX delivery web page. For reference, here is what Afghanistan's web page looks like: <https://www.gavi.org/covax-vaccine-roll-out/afghanistan>. The web pages have already been scraped for each country, but we will use string manipulations and regular expressions to extract the data from the messy text.
 
@@ -405,7 +409,17 @@ doses <- read.csv("L:/r_lessons/regex/Raw Data for Real World Example.csv")
 
 ```
 
-```{r real life example, echo = T}
+```{r real life example data cleaning, echo = T}
+
+library(RSelenium)
+
+system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE) ## Make sure no other RSelenium program is running
+
+rD <- rsDriver(browser = 'firefox') 
+
+driver <- rD[['client']]
+
+driver$navigate(doses$link[1]) ## See where the data is coming from
 
 # Get country name from link
 
@@ -414,11 +428,11 @@ doses <- doses %>%
   arrange(country)
 
 doses <- doses %>%
-  mutate(country = countrycode(country, origin = 'country.name', destination = 'country.name.en', nomatch = country)) ## clean up country names
+  mutate(country = suppressWarnings(countrycode(country, origin = 'country.name', destination = 'country.name.en', nomatch = country))) ## clean up country names
 
 # Get date of first delivery
 
-doses$text[1]
+doses$text[1] ## See what text of webpage looks like
 
 doses <- doses %>%
   mutate(first_delivery_date = str_extract(text, "\\d{1,2}\\s{1}[[:alpha:]]*\\s{1}\\d{4}"))
@@ -430,20 +444,20 @@ doses <- doses %>%
 # Find doses received
 
 received <- doses %>%
-  mutate(doses_received_text = str_extract(text, "(?<=Doses received).*(?=Doses allocated)") %>% trimws())
+  mutate(doses_received_text = str_extract(text, "(?<=Doses received).*(?=Doses allocated)") %>% trimws()) ## Find doses received text
 
 received <- received %>%
-  separate_rows(doses_received_text, sep = "vaccine") 
+  separate_rows(doses_received_text, sep = "vaccine") ## Sometimes a country has received multiple vaccine products, so we'll separate the text at the word 'vaccine'
 
 received <- received %>%
-  filter(str_detect(doses_received_text, "\\d"))
+  filter(str_detect(doses_received_text, "\\d")) ## Remove rows where there are no date
 
 received <- received %>%
-  mutate(doses_received = str_extract_all(doses_received_text, "\\d{1,3},\\d{3},\\d{3}|\\d{1,3},\\d{3}|\\d{1,3}\\.\\d{1,3}\\s{1}(?i)million|\\d{1,3}\\s{1}(?i)million(?=[:upper:])")) 
+  mutate(doses_received = str_extract_all(doses_received_text, "\\d{1,3},\\d{3},\\d{3}|\\d{1,3},\\d{3}|\\d{1,3}\\.\\d{1,3}\\s{1}(?i)million|\\d{1,3}\\s{1}(?i)million(?=[:upper:])")) ## This is really complicated because the text is quite messy. You always want your more complicated regex first since once R finds a pattern, it will disregard the other regex patterns. 
 
 received <- received %>%
-  mutate(doses_received = str_remove_all(doses_received, "[,\\s]")) %>% 
-  mutate(doses_received = ifelse(str_detect(doses_received, "(?i)million"), 
+  mutate(doses_received = str_remove_all(doses_received, "[,\\s]")) %>% ## Remove all spaces and commas
+  mutate(doses_received = ifelse(str_detect(doses_received, "(?i)million"), ## Multiply by 1,000,000 if you find the word 'million'
                                  as.numeric(trimws(str_remove_all(doses_received, "(?i)million")))*1000000,
                                  as.numeric(trimws(doses_received))))
 
@@ -475,6 +489,12 @@ allocations <- allocations %>%
 
 allocations <- allocations %>%
   mutate(vaccine_allocated = str_extract(doses_allocated_text, "(?<=\\d)\\s+.*(?=$)") %>% str_remove_all("million") %>% trimws())
+
+driver$navigate(allocations$link[which(!str_detect(allocations$vaccine_allocated, '[[:alpha:]]'))][1]) ## Not all webpages specify which vaccine product has been allocated to the country
+
+driver$close() ## Close the driver (not needed anymore)
+
+rD$server$stop() ## Stop the server
 
 allocations <- allocations %>%
   mutate(vaccine_allocated = ifelse(
@@ -515,3 +535,77 @@ covax_deliveries %>%
   summarize(sum(amount[which(type == "Received")])/sum(amount[which(type == "Allocation")])*100) %>% View() 
 
 ```
+
+## Real world example -- data exploration and analysis (GY)
+
+Regex comes in handy for many situations. Beyond data cleaning and gathering, regex can be used when exploring and analyzing data. The below example shows how regex can be used to analyze data. The below example is especially useful for those who work with claims data and builds off previous lessons on apply statements. 
+
+```{real life example data analysis, echo = T}
+
+# Some examples that use claims data. This is a simulated dataset from the pccc package with 1000 observations (id 1:1000).  Each row has 10 columns with icd10 diagnosis codes (dx1:dx10), 10 icd10 procedure codes (pc1:pc10), and 10 columns with randomn numeric values (g1:g10). Think of these as perhaps the dollar amount or the whole claim or cost sharing components, etc.  
+# The examples here use regular expressions to select rows, to count the number of times certain diagnoses occur overall or in a claim, and to select the columns of interest.
+# 
+# You can look at ICD10 codes for free here (these are the fracture codes used below: https://www.icd10data.com/ICD10CM/Codes/S00-T88/S70-S79/S72/S72.0-
+
+# install the package with the dataset
+# install.packages("pccc")
+library(data.table)
+library(pccc)
+
+# assign dataset to p
+p <- pccc::pccc_icd10_dataset
+
+# make it a data.tab;e
+p <- data.table::setDT(p)
+
+# Use the first diagnosis to choose claims. We will consider dx1 as the primary one for this. We will then cycle through all of the 10 diagnoses
+# in icd10, neoplasm codes start with C or D.  All codes starting with C are malignant neoplasms; codes that start with D00 through D49 are benign neoplasms. Codes that start with those letter/number combinations but have more digits are subsets, so D2121 is in the D21 set of codes. Codes of D50 are other types of blood disease so we do not want them
+# Count rows where dx1 is malignant neoplasm
+p[ grepl("^C", dx1), .N]
+
+# These are the codes
+grep("^C", p$dx1, value = T )
+
+# get all of the neoplasms; the ^D[0-4] selects codes that begin with capital D and where the next digit is 0 through 4
+p[ grepl("^C|^D[0-4]", dx1), .N]
+
+grep("^C|^D[0-4]", p$dx1, value = T)
+
+# so if g1 was the total cost of the claim, you could sum the costs for these row
+p[ grepl("^C|^D[0-4]", dx1), sum(g1, na.rm =T)]
+
+# lets say you wanted to identify cases where there is a neoplasm code in any of the first five diagnosis columns (dx1:dx5). count
+# first create a variable that counts the number of the dx columns begins the C in each row.  This basically loops the columns in the .SDcols through the reduce function, which sums the number of times the function is true. 
+p[ , sum_neop_5 := Reduce( `+` , lapply( .SD , function(w) grepl("^C|^D[0-4]", w ))), 
+	.SDcols = c("dx1", "dx2", "dx3", "dx4", "dx5")]
+
+p[ , .N, keyby = sum_neop_5]
+
+# same but for all 10 columns, use grep rather than writing all the column names
+p[ , sum_neop_all := Reduce( `+` , lapply( .SD , function(w) grepl("^C|^D[0-4]", w ))), 
+	.SDcols = grep("dx", names(p), value = T)]
+
+p[ , .N, keyby = sum_neop_all]
+
+# or to select the rows
+p[ sum_neop_all > 0, .N]
+
+# sum across family or multiple claims.  If the data had multiple claims for a person or family you could
+# create a variable that aggregates the number of claims with neoplasms over the family
+# group each five rows into "families"
+p[ , famid := cut(id, breaks = 200, labels = FALSE)]
+
+p[ , sum_neop_fam := sum(sum_neop_all, na.rm = T), by = famid]
+
+p[ !duplicated(famid), .N, keyby = sum_neop_all]
+
+# match a more specific diagnosis. fractures of the femur start with ^S72. codes that end in H indicate open fractures of type I or II with delayed healing.  the digits after the 2 and before the H indicate where the fracture is (lower or upper end, etc) and some other information.
+# just select case where dx1 matches, first 5 columns
+p[ grepl("^S72[[:digit:]]+H$", dx1), 1:5]
+
+# end in H or Q
+p[ grepl("^S72[[:digit:]]+(H|Q)$", dx1), 1:5]
+ 
+
+```
+
