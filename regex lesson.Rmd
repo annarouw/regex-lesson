@@ -1,7 +1,7 @@
 ---
 title: "String Manipulations and Regular Expressions"
 author: "Greg Young and Anna Rouw"
-date: "2021-06-30 and last compiled `r Sys.time`"
+date: "2022-01-11 and last compiled `r Sys.time`"
 output: output_format: html_format
 editor_options: 
   chunk_output_type: console
@@ -22,31 +22,18 @@ library(countrycode)
 
 # Introduction (GY + AR)
 
-In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>. 
+In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating/using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>.
 
-# String Manipulations (GY)
+# String Manipulating Functions (GY)
 
-Below are examples using string manipulations, with both base and stringr functions. These manipulations include detecting strings, finding string length, matching strings, extracting strings, sorting strings, duplicating strings, splitting strings, replacing strings, removing strings, and formatting strings. Below are examples of these manipulations (with examples in both base and stringr). For a reference on conversions between base and stringr, see here: <https://stringr.tidyverse.org/articles/from-base.html> 
+Below are examples using string manipulations, with both base and stringr functions. These functions include detecting strings, finding string length, matching strings, extracting strings, sorting strings, duplicating strings, splitting strings, replacing strings, removing strings, and formatting strings. Below are examples of these functions (with examples in both base and stringr). For a reference on conversions between base and stringr, see here: <https://stringr.tidyverse.org/articles/from-base.html>
 
 ```{r String Manipulations, include=FALSE}
 # String Manipulations (GY)
 
 conversion_example <- c("new jersey", "south central south carolina ", "southern california", "nebraska", "new amsterdam ave, new york city, new york state", "new mexico", "pennsylvania", "south dakota")
 
-# Detecting strings 
-
-### base
-gregexpr("new", conversion_example)	
-
-### base replicating stringr 
-lapply(gregexpr("new", conversion_example), function(i) {
-	out <- cbind(i, apply(cbind(i-1, attributes(i)$match.length), 1, sum))
-	colnames(out) <- c("start", "end"); out[out < 0] <- NA
-	return(out)
-	})	
-
-### stringr
-str_locate_all(conversion_example, "new")
+# Detecting strings ----
 
 ## Values
 ### base
@@ -69,7 +56,14 @@ grepl("south", conversion_example)
 ### stringr
 str_detect(conversion_example, "south")
 
-# Finding string length
+## Positions
+### base
+gregexpr("new", conversion_example)	
+
+### stringr
+str_locate_all(conversion_example, "new")
+
+# Finding string length ----
 
 ## base
 nchar(conversion_example)	
@@ -77,17 +71,8 @@ nchar(conversion_example)
 ## stringr
 str_length(conversion_example)
 
-# Matching strings
+# Extracting strings ----
 
-## base
-regexec( "south", conversion_example) 
-yes <- regexec( "south", conversion_example) 
-regmatches(conversion_example, yes)
-
-## stringr
-str_match( conversion_example ,"south")
-
-# Extracting strings
 ## Extract specific value
 ### base
 yes <- regexpr( "south", conversion_example) 
@@ -103,7 +88,7 @@ substr(conversion_example, 2, 4)
 ### stringr
 str_sub(conversion_example, 2, 4)
 
-# Sorting strings
+# Sorting strings ----
 
 ## base
 sort(conversion_example)
@@ -111,7 +96,7 @@ sort(conversion_example)
 ## stringr
 str_sort(conversion_example)
 
-# Duplicating strings
+# Duplicating strings ----
 
 ## base
 strrep(conversion_example, 2)	
@@ -119,7 +104,7 @@ strrep(conversion_example, 2)
 ## stringr
 str_dup(conversion_example, 2)
 
-# Splitting strings
+# Splitting strings ----
 
 ## base
 strsplit(conversion_example, " ")
@@ -127,7 +112,7 @@ strsplit(conversion_example, " ")
 ## stringr
 str_split(conversion_example, " ")
 
-# Replacing strings
+# Replacing strings ----
 
 ## base
 sub("south", "funfunfun", conversion_example)
@@ -135,7 +120,7 @@ sub("south", "funfunfun", conversion_example)
 ## stringr
 str_replace(conversion_example, "south", "funfunfun")
 
-# Removing strings 
+# Removing strings ----
 
 ## base
 sub("new", "", conversion_example)
@@ -145,45 +130,48 @@ gsub("new", "", conversion_example)
 str_remove(conversion_example, "new")
 str_remove_all(conversion_example, "new")
 
-# Formatting strings
+# Formatting strings ----
 
-## base
+## Lower case
+### base
 tolower(conversion_example)
 
-## stringr
+### stringr
 str_to_lower(conversion_example)
 
-## base
-tools::toTitleCase(conversion_example)
-
-## stringr
-str_to_title(conversion_example)
-
-## base
+## Upper case
+### base
 toupper(conversion_example)	
 
-## stringr
+### stringr
 str_to_upper(conversion_example)
 
-## base
+## Title
+### tools (similar to base)
+tools::toTitleCase(conversion_example)
+
+### stringr
+str_to_title(conversion_example)
+
+## Trim white space
+### base
 trimws(conversion_example)
 
-## stringr
+### stringr
 str_trim(conversion_example)
 
 
 ```
 
-
 # Regular Expressions (AR)
 
-Regular expressions are a sequence of special characters to describe a text pattern. Regular expressions are not unique to R and are used across programming languages. We'll go over types of regular expressions before getting into more complicated examples. Regular expression topics to be covered include anchors, quantifiers, match characters, escaping, look-arounds, grouping, case insensitivity, 
+Regular expressions are a sequence of special characters to describe a text pattern. Regular expressions are not unique to R and are used across programming languages. We'll go over types of regular expressions before getting into more complicated examples. Regular expression topics to be covered include anchors, quantifiers, match characters, escaping, look-arounds, grouping, case insensitivity, and alternates.
 
 ```{r regex, echo = T}
 
 ## Code below
 
-# Anchors
+# Anchors ----
 ## Anchors allow you to find patterns at the start or end of a string
 
 anchors_example <- c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
@@ -191,7 +179,7 @@ anchors_example <- c("January", "February", "March", "April", "May", "June", "Ju
 anchors_example[str_detect(anchors_example, "^J")] ## Find months that start with the letter J
 anchors_example[str_detect(anchors_example, "er$")] ## Find months that end in 'er'
 
-# Quantifiers
+# Quantifiers ----
 ## Quantifiers allow you to define how many times to look for a certain pattern
 
 quantifiers_example <- c("1", "2", "30000", "45600", "7836539273", "45", "150", "Anna")
@@ -200,10 +188,11 @@ str_extract(quantifiers_example, "[[:digit:]]?") ## Find digit of 0 or 1 length
 str_extract(quantifiers_example, "[[:digit:]]*") ## Find digit of any length (including 0)
 str_extract(quantifiers_example, "[[:digit:]]+") ## Find digit of at least 1 length (does not include 0)
 str_extract(quantifiers_example, "[[:digit:]]{2}") ## Find digit with at least 2 length
-str_extract(quantifiers_example, "[[:digit:]]{3,}") ## Find digits greater than 99
-str_extract(quantifiers_example, "[[:digit:]]{3,6}") ## Find digits with lengths between 3 and 6
+str_extract(quantifiers_example, "[[:digit:]]{3,}") ## Find digits greater than 99 (100+)
+str_extract(quantifiers_example, "[[:digit:]]{,6}") ## This is not how you would use a maximum value
+str_extract(quantifiers_example, "[[:digit:]]{1,6}") ## Instead, you'd have to use a range. Find digits less than 100,000
 
-# Match characters
+# Match characters ----
 ## There are certain, pre-defined match characters that look for certain character types in a string.
 
 match_character_example <- c("Alabama, 5%", "Florida 10.7%", "Colorado 7.1%", "West Virginia, 15.7%") 
@@ -214,7 +203,7 @@ str_extract_all(match_character_example, "[[:digit:]]+") ##Breaks up values when
 
 ### Punctuation
 
-str_extract_all(match_character_example, "[[:punct:]]+")
+str_extract_all(match_character_example, "[[:punct:]]+") ## To keep in mind: some of these punctuation marks are used in regex to have other meanings. We will get to this issue when escaping. 
 
 ### Letters
 
@@ -224,13 +213,27 @@ str_extract_all(match_character_example, "[[:alpha:]]+")
 
 str_extract_all(match_character_example, "[[:space:]]+")
 
-### Any character (except new lines -- \n)
+### Any character (except new lines)
 
 str_extract(match_character_example, ".+")
 
-### Other types -- lowercase, uppercase, blanks (tabs and spaces) and combinations (i.e. [[:alnum:]])
+### Blanks 
 
-# Escaping
+str_extract(match_character_example, "[[:space:]]+") ## any white space
+str_extract(match_character_example, "[[:blank:]]+") ## tabs and spaces (not new lines)
+
+### Upper case and lower case
+
+str_extract(match_character_example, "[[:upper:]]+")
+str_extract(match_character_example, "[[:lower:]]+")
+
+### Combinations -- pre-defined
+#### Numbers and letters
+
+str_extract(match_character_example, "[[:alnum:]]+") ## Does not capture spaces
+
+
+# Escaping ----
 ## Some characters, such as the $ anchor, are used to denote other patterns and do not represent the symbol itself. These characters, in order to be captured, must be escaped. We escape using the \
 
 escape_example <- c("$4500", "(Hello)", "What is your favorite movie?")
@@ -242,13 +245,30 @@ str_extract(escape_example, "\\?")
 str_extract(escape_example, "(") ## Should return an error since we have not escaped
 str_extract(escape_example, "\\(")
 
-## \ can also be used to describe a character type, such as digits or words.
+## \ can also be used to describe a character type, such as digits or words, and is not necessarily escaping. 
 
+### Words
 escape_words_example <- "Dogs are the best"
 
-str_extract_all(escape_words_example, "\\w+") ## Extracts all the words from the sentence.
+str_extract_all(escape_words_example, "\\w+") ## Extracts all the words from the sentence
+str_extract_all(escape_words_example, "\\W+") ## Extracts all non-words (opposite)
 
-# Look Arounds
+### Digits
+
+str_extract_all(escape_example, "\\d+") ## Extracts all digits
+
+### Non-digits
+
+str_extract_all(escape_example, "\\D+") ## Extracts all non-digits 
+
+### New lines, tabs, and spaces
+
+str_extract_all(escape_example, "\\n+") ## Extracts all new lines
+str_extract_all(escape_example, "\\t+") ## Extracts all tabs
+str_extract_all(escape_example, "\\s+") ## Extracts all spaces
+str_extract_all(escape_example, "\\S+") ## Extracts all non-spaces (similar to the words example)
+
+# Look Arounds ----
 ## Look-arounds are very helpful to identify patterns before and/or after a certain string. 
 ### Look behind
 
@@ -256,29 +276,41 @@ look_behind_example <- c("KFF Employee ID: 98", "KFF Employee ID: 72", "KFF Empl
 
 str_extract(look_behind_example, "(?<=KFF Employee ID: ).*")
 
-## Look ahead
+### Look ahead
 
-look_ahead_example <- c("Mr. Sam Smith", "Dr. Anthony Fauci", "Mrs. Rita Rooney")
+look_ahead_example <- c("Mr. Jefferson Smith", "Dr. Anthony Fauci", "Mrs. Jessica Rabbit")
 
 str_extract(look_ahead_example, ".*\\.(?= )")
 
-# Groups
+### Negative look behind
+
+negative_look_behind_example <- c("AL, USA", "CA, USA", "FL, USA", "BC, CAN", "ON, CAN")
+
+str_extract(negative_look_behind_example, "[[:upper:]]{2},(?! CAN)")
+
+### Negative look ahead
+
+negative_look_ahead_example <- c("Meeting minutes from 01/22/21", "No meeting minutes on 03/14/21", "Meeting minutes from 02/35/21")
+
+str_extract(negative_look_ahead_example, "(?<=No meeting minutes on )\\d{2}/\\d{2}/\\d{2}")
+
+# Groups ----
 ## Grouping allows us to set order of evaluation when looking for patterns and add a bit of flexibility.
 
-grouping_example <- c("Violet", "Vince", "Charlie", "Terry", "Vance", "Tanya", "Vicky Vaughn", "Vicky Blake")
+grouping_example <- c("Violet", "Vince", "Charlie", "Terry", "Vance", "Tanya", "Vicky Vaughn", "Vicky Clark")
 
 str_extract(grouping_example, "^(V|T).*") ## Find names that start with V or T
 
 str_extract(grouping_example, "^(V).*\\1.*") ## Allows us to reference previously created groups. The \\1 is referencing the  previous regex
 
-# Case Insensitivity
+# Case Insensitivity ----
 ## Ignore case
 
 case_insenstive_example <- c("Medicare", "medicare")
 
 str_extract(case_insenstive_example, "(?i)medicare")
 
-# Alternates
+# Alternates ----
 
 alternates_example <- c("abc", "abc123", "abc123,.", "123,.", ",.", "123", "abc,. ", "abc 123 .,")
 
@@ -299,15 +331,15 @@ str_extract(alternates_example, "[^[:alpha:]]+") ## Extract everything but alpha
 ### Range
 
 str_extract(alternates_example, "[a-c]+")
-str_extract(alternates_example, "[1-3]+")
 str_extract(alternates_example, "[d-m]+")
+str_extract(alternates_example, "[1-3]+")
 str_extract(alternates_example, "[4-6]+")
 
 ```
 
 # Examples (GY)
 
-Walking through a few examples with string manipulations and regular expressions.
+Walking through a few examples with string manipulating functions and regular expressions.
 
 ```{r examples, echo = T}
 
@@ -399,9 +431,9 @@ str_replace_all(str_replace_all(pn, "\\(" , ""), "\\)", "-")
 
 ```
 
-## Real world example -- data cleaning (AR)
+# Real world example -- data cleaning (AR)
 
-Going to be pulling data from each country's COVAX delivery web page. For reference, here is what Afghanistan's web page looks like: <https://www.gavi.org/covax-vaccine-roll-out/afghanistan>. The web pages have already been scraped for each country, but we will use string manipulations and regular expressions to extract the data from the messy text.
+Going to be pulling data from each country's COVAX delivery web page. The web pages have already been scraped for each country, but we will use string manipulations and regular expressions to extract the data from the messy text.
 
 ```{r real life example set up, include = F}
 
@@ -410,16 +442,6 @@ doses <- read.csv("L:/r_lessons/regex/Raw Data for Real World Example.csv")
 ```
 
 ```{r real life example data cleaning, echo = T}
-
-library(RSelenium)
-
-system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE) ## Make sure no other RSelenium program is running
-
-rD <- rsDriver(browser = 'firefox') 
-
-driver <- rD[['client']]
-
-driver$navigate(doses$link[1]) ## See where the data is coming from
 
 # Get country name from link
 
@@ -490,12 +512,6 @@ allocations <- allocations %>%
 allocations <- allocations %>%
   mutate(vaccine_allocated = str_extract(doses_allocated_text, "(?<=\\d)\\s+.*(?=$)") %>% str_remove_all("million") %>% trimws())
 
-driver$navigate(allocations$link[which(!str_detect(allocations$vaccine_allocated, '[[:alpha:]]'))][1]) ## Not all webpages specify which vaccine product has been allocated to the country
-
-driver$close() ## Close the driver (not needed anymore)
-
-rD$server$stop() ## Stop the server
-
 allocations <- allocations %>%
   mutate(vaccine_allocated = ifelse(
     !str_detect(vaccine_allocated, "[[:alpha:]]"),
@@ -536,9 +552,9 @@ covax_deliveries %>%
 
 ```
 
-## Real world example -- data exploration and analysis (GY)
+# Real world example -- data exploration and analysis (GY)
 
-Regex comes in handy for many situations. Beyond data cleaning and gathering, regex can be used when exploring and analyzing data. The below example shows how regex can be used to analyze data. The below example is especially useful for those who work with claims data and builds off previous lessons on apply statements. 
+Regex comes in handy for many situations. Beyond data cleaning and gathering, regex can be used when exploring and analyzing data. The below example shows how regex can be used to analyze data. The below example is especially useful for those who work with claims data and builds off previous lessons on apply statements.
 
 ```{real life example data analysis, echo = T}
 
@@ -608,4 +624,3 @@ p[ grepl("^S72[[:digit:]]+(H|Q)$", dx1), 1:5]
  
 
 ```
-
