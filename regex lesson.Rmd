@@ -359,10 +359,13 @@ id[grep("^W.+-", id)]
 # get the whole numbers
 wn <- c("173.34","Deductible $1200", "21", "Copay")
 
-# escape dollar sign and extract values
+# extract values
+str_extract( wn ,"\\d+") 
+
+# extract values preceeded dollar sign (which must be escaped)  
 str_extract( wn ,"\\$\\d+") 
 
-# escape dollar sign optional
+# extract values with or with out dollar sign (optionally include escaped dollar sign)
 str_extract( wn ,"\\$?\\d+") 
 
 # extracts first word of element
@@ -370,9 +373,6 @@ str_extract( wn ,"[[:alpha:]]+")
 
 # correct state names
 s <- c("District of\n Columbia", "South Carolina ","Texas", "Hawaii 50")
-
-# replaces "\n"
-str_replace_all(s, "\n", " ") 
 
 # removes all non alpha or space characters
 trimws(str_remove_all(s, "[^[:alpha:][:blank:]]")) 
@@ -396,30 +396,21 @@ prem <- c("HMO Premium 456","HMO Premiums 789","Premiums are 345","999 Premiums 
 #use look behind for premium
 str_extract( prem ,"(?<=Premium.{1,30}\\d{0})\\d+")
 #use look behind for deductible
-str_extract( prem ,"(?<=Deductible.{1,30}\\d{0})\\d+")
+str_extract( prem ,"(?<=Deductible.{1,30})\\d+")
 #use look ahead for number of premium
 str_extract( prem ,"(?=.{1,30}Premium)\\d+")
 
 ### get rid of punctuation and numbers
 wp <- c("Hospital.Names...3","State_ ", "George")
 
-str_replace_all(wp, "[._ \\d]", " ")
+str_trim(str_replace_all(wp, "[._ \\d]", " "))
 
 ### Convert this to a five digit zip code
-zip <- c("91367-6798","91364-2792","4605-2792")
+zip <- c("91367-6798","91364-2792","4605-2792","4812-e792")
 
 str_pad(str_extract( zip ,"\\d+(?=-)"), 5, pad = "0") 
 str_pad(str_extract( zip ,"\\d+(?=-\\d{4})"), 5, pad = "0")
 
-
-### Reduce this to First and last names 
-fl <- c("Matthew T. Rae","Claxton, Gary", "Dr. Craig Palosky Esq.", "Dr. Chris Lee", "Damico, Anthony","Daniel McDermott Jr.")
-
-# first names
-
-str_trim(str_extract( fl ,"[[:Alpha:]]+\\s|[[:Alpha:]]+$"), side ="both") 
-# first and last names
-str_replace_all(str_trim(str_replace_all(fl, "[[:alpha:]]{1,3}\\.", ""), side ="both"), "[[:punct:]]", "")
 
 # grouping - when you place parenthesis around something it keeps it as a seperate group 
 # phone numbers 
