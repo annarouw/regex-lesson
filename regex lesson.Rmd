@@ -31,7 +31,7 @@ Below are examples using string manipulations, with both base and stringr functi
 ```{r String Manipulations, include=FALSE}
 # String Manipulations (GY)
 
-conversion_example <- c("new jersey", "south central south carolina ", "southern california", "nebraska", "new amsterdam ave, new york city, new york state", "new mexico", "pennsylvania", "south dakota")
+conversion_example <- c("new jersey", "south central south carolina ", "southern california", "Nebraska", "new amsterdam ave, new york city, new york state", "New Mexico", "pennsylvania", "south dakota")
 
 # Detecting strings ----
 
@@ -88,22 +88,6 @@ substr(conversion_example, 2, 4)
 ### stringr
 str_sub(conversion_example, 2, 4)
 
-# Sorting strings ----
-
-## base
-sort(conversion_example)
-
-## stringr
-str_sort(conversion_example)
-
-# Duplicating strings ----
-
-## base
-strrep(conversion_example, 2)	
-
-## stringr
-str_dup(conversion_example, 2)
-
 # Splitting strings ----
 
 ## base
@@ -159,7 +143,6 @@ trimws(conversion_example)
 
 ### stringr
 str_trim(conversion_example)
-
 
 ```
 
