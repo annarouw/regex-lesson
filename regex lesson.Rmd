@@ -1,7 +1,7 @@
 ---
 title: "String Manipulations and Regular Expressions"
 author: "Greg Young and Anna Rouw"
-date: "2022-01-11 and last compiled `r Sys.time`"
+date: "2022-01-24 and last compiled `r Sys.time`"
 output: output_format: html_format
 editor_options: 
   chunk_output_type: console
@@ -20,9 +20,9 @@ library(countrycode)
 
 ```
 
-# Introduction (GY + AR)
+# Introduction (AR)
 
-In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating/using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>.
+In this lesson, we will go over some basic string manipulations (using the packages base and stringr), regular expressions, and a few examples. This hopefully will help when cleaning/manipulating/using character data. For a cheatsheet on stringr and regular expressions, see here: <https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf>. We will look at string munipulating functions using both base and stringr packages. In the base package, many of the functions use naming conventions that are used across programming languages (not R-specific). For example, one of the main functions, 'grep' is named so because it stands for 'global regular expressions print'. We will also look at regular expression, which are also not specific to R and are used across a variety of languages. But don't be bored by the name, even though they're regular expressions, they're cool expressions. ![](https://media.giphy.com/media/3otPoBRKROJl9UbqMM/giphy.gif)
 
 # String Manipulating Functions (GY)
 
@@ -37,49 +37,41 @@ conversion_example <- c("new jersey", "south central south carolina ", "southern
 
 ## Values
 ### base
-grep("south", conversion_example, value = TRUE)	
+grep("south", conversion_example, value = TRUE)	##Default is FALSE
 
 ### stringr
 str_subset(conversion_example, "south")
 
 ## Indices
 ### base
-grep("south", conversion_example)	
+grep("south", conversion_example) ## Value is not specified	
 
 ### stringr
 str_which(conversion_example, "south")
 
 ## Logical vector
 ### base
-grepl("south", conversion_example)	
+grepl("south", conversion_example) 	
 
 ### stringr
 str_detect(conversion_example, "south")
 
 ## Positions
 ### base
-gregexpr("new", conversion_example)	
+gregexpr("new", conversion_example)	## Returns a list (look up useBytes)
 
 ### stringr
-str_locate_all(conversion_example, "new")
-
-# Finding string length ----
-
-## base
-nchar(conversion_example)	
-
-## stringr
-str_length(conversion_example)
+str_locate_all(conversion_example, "new") ## Slightly different list. Returns starting and ending point of each match.
 
 # Extracting strings ----
 
 ## Extract specific value
 ### base
-yes <- regexpr( "south", conversion_example) 
+yes <- regexpr("south", conversion_example) 
 regmatches(conversion_example, yes)
 
 ### stringr
-str_extract( conversion_example ,"south")
+str_extract(conversion_example, "south") ## Slightly different. Returns NAs for non-matches
 
 ## Extract by position
 ### base
@@ -91,7 +83,7 @@ str_sub(conversion_example, 2, 4)
 # Splitting strings ----
 
 ## base
-strsplit(conversion_example, " ")
+strsplit(conversion_example, " ") ## Creates list of vectors
 
 ## stringr
 str_split(conversion_example, " ")
@@ -99,20 +91,22 @@ str_split(conversion_example, " ")
 # Replacing strings ----
 
 ## base
-sub("south", "funfunfun", conversion_example)
+sub("south", "funfunfun", conversion_example) ## Replaces first match
+gsub("south", "funfunfun", conversion_example) ## Replaces all matches
 
 ## stringr
-str_replace(conversion_example, "south", "funfunfun")
+str_replace(conversion_example, "south", "funfunfun") ## Replaces first match
+str_replace_all(conversion_example, "south", "funfunfun") ## Replaces all matches
 
 # Removing strings ----
 
 ## base
-sub("new", "", conversion_example)
-gsub("new", "", conversion_example)
+sub("new", "", conversion_example) ## Removes first match
+gsub("new", "", conversion_example) ## Removes all matches
 
 ## stringr
-str_remove(conversion_example, "new")
-str_remove_all(conversion_example, "new")
+str_remove(conversion_example, "new") ## Removes first match
+str_remove_all(conversion_example, "new") ## Removes all matches
 
 # Formatting strings ----
 
@@ -137,7 +131,7 @@ tools::toTitleCase(conversion_example)
 ### stringr
 str_to_title(conversion_example)
 
-## Trim white space
+## Trim white space on ends of string
 ### base
 trimws(conversion_example)
 
@@ -151,8 +145,6 @@ str_trim(conversion_example)
 Regular expressions are a sequence of special characters to describe a text pattern. Regular expressions are not unique to R and are used across programming languages. We'll go over types of regular expressions before getting into more complicated examples. Regular expression topics to be covered include anchors, quantifiers, match characters, escaping, look-arounds, grouping, case insensitivity, and alternates.
 
 ```{r regex, echo = T}
-
-## Code below
 
 # Anchors ----
 ## Anchors allow you to find patterns at the start or end of a string
@@ -202,7 +194,6 @@ str_extract(match_character_example, ".+")
 
 ### Blanks 
 
-str_extract(match_character_example, "[[:space:]]+") ## any white space
 str_extract(match_character_example, "[[:blank:]]+") ## tabs and spaces (not new lines)
 
 ### Upper case and lower case
@@ -213,8 +204,7 @@ str_extract(match_character_example, "[[:lower:]]+")
 ### Combinations -- pre-defined
 #### Numbers and letters
 
-str_extract(match_character_example, "[[:alnum:]]+") ## Does not capture spaces
-
+str_extract_all(match_character_example, "[[:alnum:]]+") ## Does not capture spaces
 
 # Escaping ----
 ## Some characters, such as the $ anchor, are used to denote other patterns and do not represent the symbol itself. These characters, in order to be captured, must be escaped. We escape using the \
@@ -275,7 +265,7 @@ str_extract(negative_look_behind_example, "[[:upper:]]{2},(?! CAN)")
 
 negative_look_ahead_example <- c("Meeting minutes from 01/22/21", "No meeting minutes on 03/14/21", "Meeting minutes from 02/35/21")
 
-str_extract(negative_look_ahead_example, "(?<=No meeting minutes on )\\d{2}/\\d{2}/\\d{2}")
+str_extract(negative_look_ahead_example, "(?<=No meeting minutes on )\\d{2}/\\d{2}/\\d{2}") ## Fix this
 
 # Groups ----
 ## Grouping allows us to set order of evaluation when looking for patterns and add a bit of flexibility.
@@ -289,8 +279,9 @@ str_extract(grouping_example, "^(V).*\\1.*") ## Allows us to reference previousl
 # Case Insensitivity ----
 ## Ignore case
 
-case_insenstive_example <- c("Medicare", "medicare")
+case_insenstive_example <- c("Medicare", "medicare", "Medicaid")
 
+str_extract(case_insenstive_example, "Medicare")
 str_extract(case_insenstive_example, "(?i)medicare")
 
 # Alternates ----
@@ -307,7 +298,7 @@ str_extract(alternates_example, "\\d+|[:punct:]+") ## Find first set of digits o
 
 str_extract(alternates_example, "[[:digit:][:punct:][:space:]]+") ## Lets you combine specific character types
 
-### Anything but
+### Anything but (negation)
 
 str_extract(alternates_example, "[^[:alpha:]]+") ## Extract everything but alphabetic characters
 
