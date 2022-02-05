@@ -58,7 +58,7 @@ str_detect(conversion_example, "south")
 
 ## Positions
 ### base
-gregexpr("new", conversion_example)	## Returns a list (look up useBytes)
+gregexpr("new", conversion_example)	## Returns a list 
 
 ### stringr
 str_locate_all(conversion_example, "new") ## Slightly different list. Returns starting and ending point of each match.
@@ -328,6 +328,9 @@ id[grep("^W[[:alpha:]]+-", id)]
 
 # returns every element starting with W followed by 1 or more of any character and then a dash
 id[grep("^W.+-", id)]
+
+# returns every element starting with some thing other than a W
+id[grep("^[^W]", id)]
 
 
 # get the whole numbers
