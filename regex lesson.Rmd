@@ -58,7 +58,7 @@ str_detect(conversion_example, "south")
 
 ## Positions
 ### base
-gregexpr("new", conversion_example)	## Returns a list 
+gregexpr("new", conversion_example)	## Returns a list
 
 ### stringr
 str_locate_all(conversion_example, "new") ## Slightly different list. Returns starting and ending point of each match.
@@ -68,6 +68,7 @@ str_locate_all(conversion_example, "new") ## Slightly different list. Returns st
 ## Extract specific value
 ### base
 yes <- regexpr("south", conversion_example) 
+yes
 regmatches(conversion_example, yes)
 
 ### stringr
@@ -86,7 +87,7 @@ str_sub(conversion_example, 2, 4)
 strsplit(conversion_example, " ") ## Creates list of vectors
 
 ## stringr
-str_split(conversion_example, " ")
+str_split(conversion_example, " ") ## Identical list
 
 # Replacing strings ----
 
@@ -157,9 +158,9 @@ anchors_example[str_detect(anchors_example, "er$")] ## Find months that end in '
 # Quantifiers ----
 ## Quantifiers allow you to define how many times to look for a certain pattern
 
-quantifiers_example <- c("1", "2", "30000", "45600", "7836539273", "45", "150", "Anna")
+quantifiers_example <- c("1", "2", "30000", "45600", "7836539273", "45", "150", "Anna", "$67")
 
-str_extract(quantifiers_example, "[[:digit:]]?") ## Find digit of 0 or 1 length 
+str_extract(quantifiers_example, "^?[[:digit:]]") ## Find digit of 0 or 1 length 
 str_extract(quantifiers_example, "[[:digit:]]*") ## Find digit of any length (including 0)
 str_extract(quantifiers_example, "[[:digit:]]+") ## Find digit of at least 1 length (does not include 0)
 str_extract(quantifiers_example, "[[:digit:]]{2}") ## Find digit with at least 2 length
@@ -248,6 +249,7 @@ str_extract_all(escape_example, "\\S+") ## Extracts all non-spaces (similar to t
 look_behind_example <- c("KFF Employee ID: 98", "KFF Employee ID: 72", "KFF Employee ID: 43")
 
 str_extract(look_behind_example, "(?<=KFF Employee ID: ).*")
+str_extract(look_behind_example, "(?<=ID: ).*")
 
 ### Look ahead
 
@@ -257,15 +259,16 @@ str_extract(look_ahead_example, ".*\\.(?= )")
 
 ### Negative look behind
 
-negative_look_behind_example <- c("AL, USA", "CA, USA", "FL, USA", "BC, CAN", "ON, CAN")
+negative_look_behind_example <- c("AL, USA", "CA, USA", "FL, USA", "BC, CAN", "ON, CAN", "MT, BR")
 
-str_extract(negative_look_behind_example, "[[:upper:]]{2},(?! CAN)")
+str_extract(negative_look_behind_example, "[[:upper:]]{2}, (?! CAN)")
+str_extract(negative_look_behind_example, "[[:upper:]]{2},(?! (CAN|BR))")
 
 ### Negative look ahead
 
 negative_look_ahead_example <- c("Meeting minutes from 01/22/21", "No meeting minutes on 03/14/21", "Meeting minutes from 02/35/21")
 
-str_extract(negative_look_ahead_example, "(?<=No meeting minutes on )\\d{2}/\\d{2}/\\d{2}") ## Fix this
+str_extract(negative_look_ahead_example, "(?<!No meeting minutes on )\\d{2}/\\d{2}/\\d{2}") 
 
 # Groups ----
 ## Grouping allows us to set order of evaluation when looking for patterns and add a bit of flexibility.
@@ -332,14 +335,13 @@ id[grep("^W.+-", id)]
 # returns every element starting with some thing other than a W
 id[grep("^[^W]", id)]
 
-
 # get the whole numbers
 wn <- c("173.34","Deductible $1200", "21", "Copay")
 
 # extract values
 str_extract( wn ,"\\d+") 
 
-# extract values preceeded dollar sign (which must be escaped)  
+# extract values preceded dollar sign (which must be escaped)  
 str_extract( wn ,"\\$\\d+") 
 
 # extract values with or with out dollar sign (optionally include escaped dollar sign)
